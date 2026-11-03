@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>worldownik — браузерные игры</title>
+<meta name="description" content="Инди-разработчик HTML5-головоломок для Пикабу Игр: Кубоскульптор, Сисадмин: Распутай серверную, Пакетный шторм.">
+<meta property="og:title" content="worldownik — браузерные игры">
+<meta property="og:description" content="Кубоскульптор, Сисадмин: Распутай серверную, Пакетный шторм — HTML5-головоломки, в которые можно играть прямо в браузере.">
+<meta property="og:image" content="https://worldownik-stack.github.io/site/img/og.jpg">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 29 9v14l-13 7-13-7V9z' fill='%23e9dcc4'/%3E%3Cpath d='M16 16 29 9v14l-13 7z' fill='%23c9b38f'/%3E%3Cpath d='M16 16 3 9v14l13 7z' fill='%23dccaa8'/%3E%3Cpath d='M16 2 29 9l-13 7L3 9z' fill='%231f9e8f'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&family=Unbounded:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#17140f; --ink-2:#221e17; --paper:#f4ede1; --paper-dim:#b9ad98;
+  --teal:#1f9e8f; --display:"Unbounded",system-ui,sans-serif;
+  --body:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --wrap:1160px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:var(--body);font-size:17px;line-height:1.6;color:var(--paper);background:var(--ink);-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+a{color:inherit}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 28px}
+h1,h2,h3{font-family:var(--display);line-height:1.08;margin:0;letter-spacing:-.01em}
+:focus-visible{outline:3px solid var(--teal);outline-offset:3px;border-radius:6px}
+
+/* ---------- top bar ---------- */
+.top{position:absolute;inset:0 0 auto;z-index:5}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;height:76px}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;font-size:17px;text-decoration:none}
+.logo svg{width:28px;height:28px}
+.top nav{display:flex;gap:26px;font-size:15px}
+.top nav a{text-decoration:none;color:var(--paper-dim);transition:color .2s}
+.top nav a:hover{color:var(--paper)}
+
+/* ---------- hero ---------- */
+.hero{position:relative;min-height:min(820px,100svh);display:flex;align-items:center;overflow:hidden;
+  background:radial-gradient(1200px 600px at 78% 40%,#2d2619 0%,transparent 60%),var(--ink)}
+.hero .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center;padding-top:96px;padding-bottom:72px}
+.eyebrow{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin:0 0 20px}
+.hero h1{font-size:clamp(38px,5.6vw,70px);font-weight:800}
+.hero h1 em{font-style:normal;color:#e9c98f}
+.hero p.lede{font-size:clamp(17px,1.6vw,20px);color:#d9cfbe;max-width:34em;margin:26px 0 34px}
+.stats{display:flex;flex-wrap:wrap;gap:12px;margin:0;padding:0;list-style:none}
+.stats li{border:1px solid #3a3326;border-radius:999px;padding:8px 16px;font-size:14px;color:#d9cfbe}
+.stats b{color:var(--paper);font-weight:700}
+
+.stage{perspective:1100px;display:grid;place-items:center;height:420px}
+.cube{--s:216px;width:var(--s);height:var(--s);position:relative;transform-style:preserve-3d;transform:rotateX(-24deg) rotateY(38deg);animation:turn 22s linear infinite}
+@keyframes turn{to{transform:rotateX(-24deg) rotateY(398deg)}}
+.face{position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px;background:#8f7a5a;backface-visibility:hidden}
+.face i{display:grid;place-items:center;font-style:normal;font-family:var(--display);font-weight:700;font-size:30px;color:#3b2f20;
+  background:linear-gradient(145deg,#f3e7cf,#e0cfae);border-radius:4px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.08)}
+.face i.mark{background:linear-gradient(145deg,#49c4b4,#1f9e8f);color:#fff}
+.face i.c span{border:3px solid currentColor;border-radius:50%;width:1.6em;height:1.6em;display:grid;place-items:center;font-size:.8em}
+.face i.q span{border:3px solid currentColor;border-radius:4px;width:1.55em;height:1.55em;display:grid;place-items:center;font-size:.8em}
+.f1{transform:translateZ(calc(var(--s)/2))}
+.f2{transform:rotateY(180deg) translateZ(calc(var(--s)/2))}
+.f3{transform:rotateY(90deg) translateZ(calc(var(--s)/2))}
+.f4{transform:rotateY(-90deg) translateZ(calc(var(--s)/2))}
+.f5{transform:rotateX(90deg) translateZ(calc(var(--s)/2))}
+.f6{transform:rotateX(-90deg) translateZ(calc(var(--s)/2))}
+.plinth{position:absolute;width:330px;height:80px;border-radius:50%;bottom:22px;left:50%;transform:translateX(-50%);
+  background:radial-gradient(closest-side,rgba(233,201,143,.28),transparent)}
+.stage{position:relative}
+.float{position:absolute;filter:drop-shadow(0 14px 18px rgba(0,0,0,.45));animation:bob 5s ease-in-out infinite}
+.float.a{width:84px;left:-2%;top:6%;animation-delay:-1s}
+.float.b{width:74px;right:-2%;top:0;animation-delay:-2.6s}
+.float.c{width:90px;right:-4%;bottom:2%;animation-delay:-.4s}
+@keyframes bob{50%{transform:translateY(-12px) rotate(-2deg)}}
+
+.games-nav{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:44px;max-width:640px}
+.games-nav a{display:block;text-decoration:none;border-radius:14px;padding:14px 16px;font-size:14px;line-height:1.35;transition:transform .2s}
+.games-nav a:hover{transform:translateY(-3px)}
+.games-nav b{display:block;font-family:var(--display);font-size:15px;margin-bottom:2px}
+.gn-kubo{background:#f4ede1;color:#3b2f20}
+.gn-sys{background:#2f3438;color:#e8e2d6;border:1px solid #465057}
+.gn-storm{background:#0c0d13;color:#e8f6ff;border:1px solid #3a2050;box-shadow:inset 0 0 0 1px rgba(255,63,180,.15)}
+
+/* ---------- game sections (shared) ---------- */
+.game{position:relative;padding:120px 0;overflow:hidden}
+.game .wrap{display:grid;grid-template-columns:1fr 1.1fr;gap:64px;align-items:center}
+.game.flip .text{order:2}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.chip{font-size:12.5px;font-weight:700;letter-spacing:.04em;padding:5px 12px;border-radius:999px}
+.game h2{font-size:clamp(34px,4.4vw,56px);font-weight:800}
+.game h2 small{display:block;font-size:.42em;font-weight:500;margin-top:12px;letter-spacing:0;opacity:.75}
+.game .lede{font-size:19px;margin:24px 0 26px;max-width:32em}
+.feats{list-style:none;margin:0 0 34px;padding:0;display:grid;gap:12px}
+.feats li{position:relative;padding-left:30px;font-size:16px}
+.feats li::before{content:"";position:absolute;left:0;top:.5em;width:14px;height:14px;border-radius:4px}
+.feats b{font-weight:700}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+.play{display:inline-flex;align-items:center;gap:10px;font-weight:700;font-size:16px;text-decoration:none;padding:14px 22px;border-radius:12px;transition:transform .15s,box-shadow .2s}
+.play:hover{transform:translateY(-2px)}
+.play svg{width:18px;height:18px}
+.play.soon{cursor:default;opacity:.72;transform:none !important}
+.play.soon::after{content:"скоро";font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:6px;background:rgba(127,127,127,.25)}
+
+/* before/after slider */
+.ba{position:relative;border-radius:18px;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:pan-y}
+.ba img{width:100%;height:auto;pointer-events:none}
+.ba .after{position:absolute;inset:0;clip-path:inset(0 0 0 var(--p,50%))}
+.ba .after img{height:100%;object-fit:cover}
+.ba input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;margin:0;touch-action:pan-y}
+.ba .handle{position:absolute;top:0;bottom:0;left:var(--p,50%);width:3px;transform:translateX(-50%);pointer-events:none}
+.ba .handle::after{content:"";position:absolute;top:50%;left:50%;width:46px;height:46px;border-radius:50%;transform:translate(-50%,-50%);
+  background:center/22px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 6-6 6 6 6M15 6l6 6-6 6'/%3E%3C/svg%3E"),#fff;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.ba .tag{position:absolute;top:14px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 11px;border-radius:8px;pointer-events:none}
+.ba .tag.l{left:14px}.ba .tag.r{right:14px}
+.caption{font-size:14px;margin-top:14px;opacity:.7}
+
+/* ---------- Кубоскульптор ---------- */
+.kubo{background:linear-gradient(180deg,#f6efe3,#efe4d1);color:#3b2f20}
+.kubo .chip{background:#e6d7bb;color:#5b4528}
+.kubo .chip.plat{background:#1f9e8f;color:#fff}
+.kubo h2 small{color:#7a6142}
+.kubo .feats li::before{background:#1f9e8f;box-shadow:inset 0 -3px 0 rgba(0,0,0,.15)}
+.kubo .feats li:nth-child(2)::before{background:#e9dcc4;border:1px solid #c4ad86}
+.kubo .feats li:nth-child(3)::before{background:#c9473a}
+.kubo .play{background:#1f9e8f;color:#fff;box-shadow:0 8px 20px rgba(31,158,143,.3)}
+.kubo .play.ghost{background:transparent;color:#5b4528;box-shadow:inset 0 0 0 2px #cdb995}
+.shelves{display:grid;gap:0}
+.shelf{display:grid;grid-template-columns:repeat(4,1fr);align-items:end;gap:10px;padding:18px 14px 0;position:relative}
+.shelf::after{content:"";position:absolute;left:0;right:0;bottom:-18px;height:18px;border-radius:4px;
+  background:linear-gradient(180deg,#c99a63,#a6743f 60%,#8a5c2e);box-shadow:0 14px 22px rgba(90,60,25,.25)}
+.shelf+.shelf{margin-top:40px}
+.fig{display:flex;flex-direction:column;align-items:center;gap:8px}
+.fig img{max-height:118px;width:auto;filter:drop-shadow(0 6px 6px rgba(80,55,20,.25));transition:transform .3s}
+.fig:hover img{transform:translateY(-6px) rotate(-3deg)}
+.fig span{font-size:12.5px;font-weight:700;color:#7a6142;background:#fbf6ec;border-radius:6px;padding:2px 8px;margin-bottom:6px;white-space:nowrap}
+
+/* ---------- Сисадмин ---------- */
+.sys{background:#282c2f;color:#e8e2d6}
+.sys::before{content:"";position:absolute;inset:0;opacity:.08;background:url(img/sys-city.webp) center/cover;pointer-events:none}
+.sys .wrap{position:relative}
+.sys .chip{background:#3a4045;color:#d9d2c4}
+.sys .chip.plat{background:#f0a03c;color:#2a1c06}
+.sys h2{color:#fff}
+.sys h2 small{color:#f0a03c}
+.sys .feats li::before{background:#f0a03c}
+.sys .feats li:nth-child(2)::before{background:#4aa3ff}
+.sys .feats li:nth-child(3)::before{background:#59c36a}
+.sys .feats li:nth-child(4)::before{background:#e5544b}
+.sys .play{background:#f0a03c;color:#2a1c06;box-shadow:0 8px 22px rgba(240,160,60,.25)}
+.sys .ba{box-shadow:0 30px 60px rgba(0,0,0,.4)}
+.sys .tag{background:rgba(20,22,24,.8);color:#e8e2d6}
+.sys .tag.r{background:#f0a03c;color:#2a1c06}
+.cables{position:absolute;left:0;right:0;bottom:0;height:10px;display:flex}
+.cables i{flex:1}
+
+/* ---------- Пакетный шторм ---------- */
+.storm{background:radial-gradient(900px 500px at 70% 30%,rgba(255,63,180,.12),transparent 60%),radial-gradient(800px 500px at 20% 90%,rgba(45,226,230,.10),transparent 60%),#0b0c12;color:#dfe9f2}
+.storm .chip{background:#1a1c27;color:#aab6c4;border:1px solid #2a2d3c}
+.storm .chip.plat{background:transparent;color:#2de2e6;border-color:#2de2e6}
+.storm .chip.plat.pink{color:#ff3fb4;border-color:#ff3fb4}
+.storm h2{color:#fff;text-shadow:0 0 28px rgba(255,63,180,.45)}
+.storm h2 small{color:#2de2e6;text-shadow:none}
+.storm .feats li::before{background:#ff3fb4;box-shadow:0 0 12px #ff3fb4}
+.storm .feats li:nth-child(even)::before{background:#2de2e6;box-shadow:0 0 12px #2de2e6}
+.storm .play{background:linear-gradient(90deg,#ff3fb4,#b14dff);color:#fff;box-shadow:0 0 26px rgba(255,63,180,.35)}
+.storm .play.alt{background:transparent;color:#2de2e6;box-shadow:inset 0 0 0 2px #2de2e6}
+.storm .ba{box-shadow:0 0 0 1px #24263a,0 30px 70px rgba(0,0,0,.6)}
+.storm .tag{background:rgba(10,11,16,.75);color:#aab6c4}
+.storm .tag.r{background:#ff3fb4;color:#fff}
+.merge{margin-top:34px}
+.merge h3{font-family:var(--body);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#7f8aa0;margin-bottom:14px}
+.chain{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
+.tier{position:relative;background:#141622;border:1px solid #24273a;border-radius:12px;aspect-ratio:1;display:grid;place-items:center;padding:6px;transition:border-color .2s,transform .2s}
+.tier:hover{border-color:#ff3fb4;transform:translateY(-3px)}
+.tier img{width:100%;height:auto}
+.tier b{position:absolute;top:4px;left:6px;font-size:10px;color:#5d6780}
+.tier .tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);white-space:nowrap;background:#ff3fb4;color:#fff;font-size:12px;font-weight:700;padding:4px 9px;border-radius:7px;opacity:0;pointer-events:none;transition:opacity .15s}
+.tier:hover .tip,.tier:focus .tip{opacity:1}
+.chain-ends{display:flex;justify-content:space-between;font-size:13px;color:#7f8aa0;margin-top:10px}
+
+/* ---------- footer ---------- */
+.contact{padding:110px 0 60px;background:var(--ink)}
+.contact h2{font-size:clamp(30px,4vw,48px);font-weight:800;max-width:15em}
+.contact p{color:#cfc5b3;max-width:36em;font-size:18px}
+.links{display:flex;flex-wrap:wrap;gap:12px;margin:30px 0 80px}
+.links a{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font-weight:700;padding:13px 20px;border-radius:12px;background:#2a251c;border:1px solid #3a3326;transition:background .2s}
+.links a:hover{background:#352e22}
+.links svg{width:20px;height:20px}
+.contact p a.mail{color:#e9c98f;font-weight:700;text-decoration-thickness:1px;text-underline-offset:3px}
+.foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:13px;color:#7d7363;border-top:1px solid #2b261d;padding-top:24px}
+
+/* ---------- reveal ---------- */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+.reveal.on{opacity:1;transform:none}
+
+/* ---------- responsive ---------- */
+@media (max-width:920px){
+  .hero .wrap,.game .wrap{grid-template-columns:1fr;gap:44px}
+  .game.flip .text{order:0}
+  .stage{height:340px}
+  .cube{--s:170px}
+  .float.a{width:62px;left:0;top:4%}.float.b{width:56px;right:0}.float.c{width:66px;right:0;bottom:4%}
+  .face i{font-size:23px}
+  .game{padding:88px 0}
+}
+@media (max-width:620px){
+  body{font-size:16px}
+  .wrap{padding:0 20px}
+  .top nav{display:none}
+  .games-nav{grid-template-columns:1fr}
+  .shelf{gap:4px;padding:14px 4px 0}
+  .fig img{max-height:76px}
+  .fig span{font-size:11px;padding:2px 5px}
+  .chain{grid-template-columns:repeat(5,1fr)}
+  .game .lede{font-size:17px}
+}
+@media (prefers-reduced-motion:reduce){
+  .cube,.float{animation:none}
+  .reveal{opacity:1;transform:none;transition:none}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 29 9v14l-13 7-13-7V9z" fill="#e9dcc4"/><path d="M16 16 29 9v14l-13 7z" fill="#c9b38f"/><path d="M16 16 3 9v14l13 7z" fill="#dccaa8"/><path d="M16 2 29 9l-13 7L3 9z" fill="#1f9e8f"/></svg>
+      worldownik
+    </a>
+    <nav aria-label="Разделы">
+      <a href="#kubo">Кубоскульптор</a>
+      <a href="#sysadmin">Распутай серверную</a>
+      <a href="#storm">Пакетный шторм</a>
+      <a href="#contact">Связаться</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Инди-разработчик браузерных игр</p>
+      <h1>Головоломки, от&nbsp;которых <em>сложно оторваться</em></h1>
+      <p class="lede">Делаю HTML5-игры для Пикабу Игр: в одиночку, от первой механики до релиза. Играются прямо в браузере — на телефоне и на компьютере.</p>
+      <ul class="stats">
+        <li><b>3</b> игры</li>
+        <li>ПК и телефон</li>
+        <li><b>125</b> фигур в Кубоскульпторе</li>
+        <li>TypeScript · three.js · Canvas</li>
+      </ul>
+      <div class="games-nav">
+        <a class="gn-kubo" href="#kubo"><b>Кубоскульптор</b>3D-кроссворд из кубов</a>
+        <a class="gn-sys" href="#sysadmin"><b>Сисадмин</b>Распутай серверную</a>
+        <a class="gn-storm" href="#storm"><b>Пакетный шторм</b>Спаси серверную</a>
+      </div>
+    </div>
+    <div class="stage" aria-hidden="true">
+      <div class="plinth"></div>
+      <div class="cube" id="cube"></div>
+      <img class="float a" src="img/kubo-pet_01.webp" alt="">
+      <img class="float b" src="img/kubo-food_01.webp" alt="">
+      <img class="float c" src="img/kubo-fx_02.webp" alt="">
+    </div>
+  </div>
+</section>
+
+<!-- ======================= КУБОСКУЛЬПТОР ======================= -->
+<section class="game kubo" id="kubo">
+  <div class="wrap">
+    <div class="text reveal">
+      <div class="meta">
+        <span class="chip plat">Пикабу Игры</span>
+        <span class="chip">3D-головоломка</span>
+        <span class="chip">ПК и телефон</span>
+      </div>
+      <h2>Кубоскульптор<small>Японский кроссворд в трёх измерениях</small></h2>
+      <p class="lede">Перед вами блок из кубов, а внутри него спрятана статуэтка. Цифры на гранях подсказывают, сколько кубов фигуры в каждом ряду. Отбивайте лишнее молотком, и когда последний ненужный куб исчезнет, фигура оживёт в цвете.</p>
+      <ul class="feats">
+        <li><b>Молоток и кисть.</b> Ломайте лишние кубы, а нужные помечайте, чтобы не задеть.</li>
+        <li><b>Срезы слоёв.</b> Заглядывайте внутрь блока, когда внешние ряды уже решены.</li>
+        <li><b>Без угадывания.</b> Каждый уровень решается чистой логикой, и решение у него одно.</li>
+        <li><b>125 фигур в 12 наборах:</b> еда, море, космос, сказки, транспорт и другие. Решённые встают на полку в коллекцию.</li>
+      </ul>
+      <div class="actions">
+        <!-- Вставьте ссылку на страницу игры в href -->
+        <a class="play" href="https://games.pikabu.ru/game/kuboskulptor"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>Играть на Пикабу Играх</a>
+      </div>
+    </div>
+    <div class="shelves reveal" role="list" aria-label="Фигуры из игры">
+      <div class="shelf">
+        <div class="fig" role="listitem"><img src="img/kubo-pet_01.webp" alt="Кот из кубов"><span>Кот</span></div>
+        <div class="fig" role="listitem"><img src="img/kubo-food_05.webp" alt="Мороженое из кубов"><span>Мороженое</span></div>
+        <div class="fig" role="listitem"><img src="img/kubo-fx_04.webp" alt="Корона из кубов"><span>Корона</span></div>
+        <div class="fig" role="listitem"><img src="img/kubo-nat_04.webp" alt="Тюльпан из кубов"><span>Тюльпан</span></div>
+      </div>
+      <div class="shelf">
+        <div class="fig" role="listitem"><img src="img/kubo-sea_03.webp" alt="Осьминог из кубов"><span>Осьминог</span></div>
+        <div class="fig" role="listitem"><img src="img/kubo-tr_03.webp" alt="Пожарная машина из кубов"><span>Пожарная машина</span></div>
+        <div class="fig" role="listitem"><img src="img/kubo-pet_04.webp" alt="Свинка из кубов"><span>Свинка</span></div>
+        <div class="fig" role="listitem"><img src="img/kubo-fx_02.webp" alt="Дракончик из кубов"><span>Дракончик</span></div>
+      </div>
+      <div class="shelf">
+        <div class="fig" role="listitem"><img src="img/kubo-food_01.webp" alt="Яблоко из кубов"><span>Яблоко</span></div>
+        <div class="fig" role="listitem"><img src="img/kubo-sea_06.webp" alt="Медуза из кубов"><span>Медуза</span></div>
+        <div class="fig" role="listitem"><img src="img/kubo-city_09.webp" alt="Карусель из кубов"><span>Карусель</span></div>
+        <div class="fig" role="listitem"><img src="img/kubo-home_04.webp" alt="Кресло из кубов"><span>Кресло</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= СИСАДМИН ======================= -->
+<section class="game sys flip" id="sysadmin">
+  <div class="wrap">
+    <div class="text reveal">
+      <div class="meta">
+        <span class="chip plat">Пикабу Игры</span>
+        <span class="chip">Головоломка</span>
+        <span class="chip">ПК и телефон</span>
+      </div>
+      <h2>Сисадмин: Распутай серверную<small>Кабели, стойки и комната, которую пора чинить</small></h2>
+      <p class="lede">На плате перепутаны кабели. Нажмите на коннектор, и он вылетит по стрелке, если путь свободен. Освобождайте плату в правильном порядке, получайте за это Стабильность и тратьте её на ремонт комнаты сисадмина.</p>
+      <ul class="feats">
+        <li><b>Ремонт за победы.</b> Из заваленной каптерки получается рабочая серверная, предмет за предметом.</li>
+        <li><b>Путь из Кабелёво в Гигабитск.</b> Карта с точками ремонта: НИИ, бизнес-центр, машзал хостинга.</li>
+        <li><b>Кусачки, прозвонка и изолента</b> выручат, когда плата совсем запуталась.</li>
+        <li><b>Уровни не кончаются:</b> генератор собирает новые платы с растущей сложностью.</li>
+      </ul>
+      <div class="actions">
+        <!-- Вставьте ссылку на страницу игры в href -->
+        <a class="play" href="https://games.pikabu.ru/game/sisadmin-rasputay-servernuyu"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>Играть на Пикабу Играх</a>
+      </div>
+    </div>
+    <div class="reveal">
+      <div class="ba" style="--p:50%">
+        <img src="img/sys-before.webp" alt="Каптерка НИИ до ремонта: мусор, коробки, спутанные провода" width="1024" height="1024">
+        <div class="after"><img src="img/sys-after.webp" alt="Каптерка НИИ после ремонта: порядок, новое кресло, тёплый свет" width="1024" height="1024"></div>
+        <div class="handle"></div>
+        <span class="tag l">До</span><span class="tag r">После</span>
+        <input type="range" min="0" max="100" value="50" aria-label="Сравнить комнату до и после ремонта">
+      </div>
+      <p class="caption">Каптерка НИИ, первая комната. Потяните ползунок.</p>
+    </div>
+  </div>
+  <div class="cables" aria-hidden="true"><i style="background:#f0a03c"></i><i style="background:#4aa3ff"></i><i style="background:#59c36a"></i><i style="background:#e5544b"></i><i style="background:#c38bff"></i></div>
+</section>
+
+<!-- ======================= ПАКЕТНЫЙ ШТОРМ ======================= -->
+<section class="game storm" id="storm">
+  <div class="wrap">
+    <div class="text reveal">
+      <div class="meta">
+        <span class="chip plat pink">Пикабу Игры</span>
+        <span class="chip">Пазл · Merge-2</span>
+      </div>
+      <h2>Пакетный шторм<small>Спаси серверную, пока не случился KERNEL PANIC</small></h2>
+      <p class="lede">Отправляйте пакеты с патч-панели на шину: они едут вокруг матрицы и выбивают блоки своего цвета. Пакет, которому некуда стрелять, уходит в кэш. Если кэш забит, случается KERNEL PANIC.</p>
+      <ul class="feats">
+        <li><b>Три механики в одной:</b> Tap Away, конвейер-шутер и Merge-2.</li>
+        <li><b>Босс «Пятничный деплой»</b> каждый пятый тикет, а со временем добавляются стяжки и пайка.</li>
+        <li><b>Своя серверная.</b> Собирайте железо от болтика до квантового кластера и обставляйте подвал.</li>
+        <li><b>Бустеры</b> «Кусачки», «Пинг-Сканер» и «Оверклокинг» для самых плотных тикетов.</li>
+      </ul>
+      <div class="actions">
+        <!-- Ссылка на страницу игры — в href -->
+        <a class="play" href="https://games.pikabu.ru/game/paketnyiy-shtorm-spasi-servernuyu"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>Играть на Пикабу Играх</a>
+      </div>
+    </div>
+    <div class="reveal">
+      <div class="ba" style="--p:50%">
+        <img src="img/storm-before.webp" alt="Пустой бетонный подвал со старым монитором" width="1024" height="512">
+        <div class="after"><img src="img/storm-after.webp" alt="Обустроенная серверная с неоновой подсветкой, стойками и котом на роботе-пылесосе" width="1024" height="512"></div>
+        <div class="handle"></div>
+        <span class="tag l">Старт</span><span class="tag r">10-й тир</span>
+        <input type="range" min="0" max="100" value="50" aria-label="Сравнить серверную в начале и на десятом тире">
+      </div>
+      <div class="merge">
+        <h3>Цепочка слияний: 10 тиров</h3>
+        <div class="chain" id="chain"></div>
+        <div class="chain-ends"><span>Болтик</span><span>Квантовый кластер</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="contact" id="contact">
+  <div class="wrap">
+    <h2>Хотите поиграть, предложить идею или поработать вместе?</h2>
+    <p>Что-то сломалось в игре, есть идея или предложение? Напишите на <a class="mail" href="mailto:listvenikk@yandex.ru">listvenikk@yandex.ru</a>. Читаю всё, на баг-репорты отвечаю в первую очередь.</p>
+    <div class="links">
+      <a href="mailto:listvenikk@yandex.ru?subject=%D0%98%D0%B3%D1%80%D1%8B"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Написать на почту</a>
+      <a href="https://github.com/worldownik-stack"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.11.79-.25.79-.56v-2c-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.39-5.27 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.68.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>GitHub</a>
+    </div>
+    <div class="foot">
+      <span>© <span id="year">2026</span> worldownik</span>
+      <span>Все игры сделаны одним разработчиком</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(() => {
+  // Кнопки без ссылки превращаются в плашку «скоро»
+  document.querySelectorAll('a.play').forEach(a => {
+    if (!a.getAttribute('href')) {
+      a.removeAttribute('href');
+      a.classList.add('soon');
+      a.setAttribute('aria-disabled', 'true');
+    } else {
+      a.target = '_blank'; a.rel = 'noopener';
+    }
+  });
+
+  // Куб из подсказок: c — число в кружке (2 группы), q — в квадрате (3+), m — помеченный куб
+  const faces = [
+    ['0','1','2', '2','4m','2', 'c2','3','0'],
+    ['1','3','q3', '0','2','2m', '1','c2','0'],
+    ['2','0','1', 'q4','2','3', '0','1m','2'],
+    ['3','c2','1', '1','0','2', '2m','3','1'],
+    ['0','2','0', '2','q3','2', '0','2','0'],
+    ['1','1','1', '2','0m','2', '1','c3','1'],
+  ];
+  const cube = document.getElementById('cube');
+  faces.forEach((f, i) => {
+    const el = document.createElement('div');
+    el.className = 'face f' + (i + 1);
+    el.innerHTML = f.map(t => {
+      const mark = t.endsWith('m'); t = t.replace('m', '');
+      const kind = t[0] === 'c' ? 'c' : t[0] === 'q' ? 'q' : '';
+      const n = kind ? t.slice(1) : t;
+      return `<i class="${kind} ${mark ? 'mark' : ''}">${kind ? `<span>${n}</span>` : n}</i>`;
+    }).join('');
+    cube.appendChild(el);
+  });
+
+  // Цепочка слияний
+  const tiers = ['Болтик','Кулер','Плашка ОЗУ','Материнка','Видеокарта','Серверный блейд','Стойка','СХД','Суперкомпьютер','Квантовый кластер'];
+  document.getElementById('chain').innerHTML = tiers.map((t, i) =>
+    `<div class="tier" tabindex="0"><b>${i + 1}</b><img src="img/storm-item-${i + 1}.webp" alt="${t}" width="192" height="192"><span class="tip">${t}</span></div>`
+  ).join('');
+
+  // Слайдеры «до/после»
+  document.querySelectorAll('.ba').forEach(ba => {
+    const r = ba.querySelector('input');
+    const set = () => ba.style.setProperty('--p', r.value + '%');
+    r.addEventListener('input', set); set();
+  });
+
+  // Появление при прокрутке
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); }
+  }), { threshold: .15 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+})();
+</script>
+</body>
+</html>
