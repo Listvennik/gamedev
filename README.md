@@ -1,7 +1,7 @@
 # worldownik — сайт-визитка
 
 Статический сайт с играми: Кубоскульптор, Сисадмин: Распутай серверную, Пакетный шторм.
-Адрес: https://worldownik-stack.github.io/site/
+Адрес: https://listvennik.github.io/gamedev/
 
 ## Как поменять ссылку на игру
 В `index.html` найдите кнопку `<a class="play" href="...">` нужной игры и замените адрес в `href`.
